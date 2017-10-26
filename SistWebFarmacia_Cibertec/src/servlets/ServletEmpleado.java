@@ -6,6 +6,7 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 import beans.EmpleadoDTO;
 import service.EmpleadoService;
@@ -24,7 +25,15 @@ public class ServletEmpleado extends HttpServlet {
 		String xtipo = request.getParameter("tipo");
 		if(xtipo.equals("sesion")) {
 			iniciarSesion(request,response);
+		}else if(xtipo.equals("cerrarSesion")) {
+			cerrarSesion(request, response);
 		}
+	}
+
+	private void cerrarSesion(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		HttpSession sesion = request.getSession();
+		sesion.invalidate();
+		request.getRequestDispatcher("index.jsp").forward(request, response);
 	}
 
 	private void iniciarSesion(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -36,10 +45,13 @@ public class ServletEmpleado extends HttpServlet {
 		EmpleadoDTO obj = servEmp.autentificacionEmpleado(xuser, xpass);
 		
 		if(obj != null) {
+			HttpSession sesion = request.getSession();
+			sesion.setAttribute("usuario", obj);
 			request.getRequestDispatcher("factura.jsp").forward(request, response);
+			
 		}else {
 			request.setAttribute("msg", "Usuario no registrado");
-			request.getRequestDispatcher("login.jsp").forward(request, response);
+			request.getRequestDispatcher("index.jsp").forward(request, response);
 		}
 	}
 	
